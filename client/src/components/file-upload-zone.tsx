@@ -68,8 +68,8 @@ export function FileUploadZone({ onFileSelect, isUploading, error, onRetry }: Fi
         </Alert>
       )}
 
-      <Card
-        className={`p-8 border-2 border-dashed transition-all ${
+      <div
+        className={`p-8 border-2 border-dashed rounded-md transition-all bg-card ${
           isDragging
             ? "border-primary bg-accent/50"
             : "border-border hover-elevate"
@@ -77,7 +77,7 @@ export function FileUploadZone({ onFileSelect, isUploading, error, onRetry }: Fi
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        data-testid="card-upload-zone"
+        data-testid="zone-upload-drag-drop"
       >
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="p-4 rounded-full bg-primary/10">
@@ -127,7 +127,7 @@ export function FileUploadZone({ onFileSelect, isUploading, error, onRetry }: Fi
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

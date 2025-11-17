@@ -72,12 +72,18 @@ async function processDocument(jobId: string, filePath: string, fileExtension: s
     const audioPath = path.join(audioDir, audioFileName);
     const ttsScript = path.join(process.cwd(), 'python', 'tts_generator.py');
     
-    const escapedMarkdown = rewrittenMarkdown.replace(/"/g, '\\"').replace(/\n/g, ' ');
+    const tempMarkdownPath = path.join(uploadsDir, `${jobId}.md`);
+    fs.writeFileSync(tempMarkdownPath, rewrittenMarkdown);
+    
     const { stdout: ttsOutput } = await execAsync(
-      `${pythonPath} "${ttsScript}" "${escapedMarkdown}" "${audioPath}"`
+      `${pythonPath} "${ttsScript}" "${tempMarkdownPath}" "${audioPath}"`
     );
     
     const ttsResult = JSON.parse(ttsOutput);
+    
+    if (fs.existsSync(tempMarkdownPath)) {
+      fs.unlinkSync(tempMarkdownPath);
+    }
     
     if (!ttsResult.success) {
       throw new Error(ttsResult.error || 'Audio generation failed');

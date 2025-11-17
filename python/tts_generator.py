@@ -51,11 +51,18 @@ def generate_audio(text, output_path):
 
 def main():
     if len(sys.argv) < 3:
-        print(json.dumps({"error": "Usage: tts_generator.py <markdown_text> <output_path>"}))
+        print(json.dumps({"error": "Usage: tts_generator.py <markdown_file_path> <output_path>"}))
         sys.exit(1)
     
-    markdown_text = sys.argv[1]
+    markdown_file_path = sys.argv[1]
     output_path = sys.argv[2]
+    
+    try:
+        with open(markdown_file_path, 'r', encoding='utf-8') as f:
+            markdown_text = f.read()
+    except Exception as e:
+        print(json.dumps({"error": f"Failed to read markdown file: {str(e)}", "success": False}))
+        sys.exit(1)
     
     try:
         chapters = parse_markdown_for_chapters(markdown_text)

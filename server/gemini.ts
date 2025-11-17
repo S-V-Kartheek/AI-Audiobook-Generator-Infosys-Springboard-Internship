@@ -4,7 +4,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export async function rewriteAsPodcastScript(text: string): Promise<string> {
   try {
-    const systemPrompt = `You are an expert podcast script writer. Transform the following text into an engaging, conversational podcast script. 
+    const prompt = `You are an expert podcast script writer. Transform the following text into an engaging, conversational podcast script. 
 
 Guidelines:
 - Use a warm, conversational tone as if speaking directly to listeners
@@ -17,17 +17,17 @@ Guidelines:
 - Start with a brief, engaging introduction
 - End with a thoughtful conclusion or call to action
 
-Format the output in clean markdown with proper headings and paragraphs.`;
+Format the output in clean markdown with proper headings and paragraphs.
+
+TEXT TO TRANSFORM:
+${text}`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
-      config: {
-        systemInstruction: systemPrompt,
-      },
-      contents: `Transform this text into an engaging podcast script:\n\n${text}`,
+      model: "gemini-2.5-flash",
+      contents: prompt,
     });
 
-    const rewrittenText = response.text;
+    const rewrittenText = (typeof response.text === 'function' ? await response.text() : response.text) || "";
     
     if (!rewrittenText || rewrittenText.length < 50) {
       throw new Error("Generated script is too short");
