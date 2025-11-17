@@ -1,37 +1,42 @@
-import { type User, type InsertUser } from "@shared/schema";
+import type { ProcessingJob } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createJob(originalFilename: string): Promise<ProcessingJob>;
+  getJob(id: string): Promise<ProcessingJob | undefined>;
+  updateJob(id: string, updates: Partial<ProcessingJob>): Promise<ProcessingJob | undefined>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+  private jobs: Map<string, ProcessingJob>;
 
   constructor() {
-    this.users = new Map();
+    this.jobs = new Map();
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createJob(originalFilename: string): Promise<ProcessingJob> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const job: ProcessingJob = {
+      id,
+      status: 'extracting',
+      progress: 0,
+      originalFilename,
+    };
+    this.jobs.set(id, job);
+    return job;
+  }
+
+  async getJob(id: string): Promise<ProcessingJob | undefined> {
+    return this.jobs.get(id);
+  }
+
+  async updateJob(id: string, updates: Partial<ProcessingJob>): Promise<ProcessingJob | undefined> {
+    const job = this.jobs.get(id);
+    if (!job) return undefined;
+
+    const updatedJob = { ...job, ...updates };
+    this.jobs.set(id, updatedJob);
+    return updatedJob;
   }
 }
 
