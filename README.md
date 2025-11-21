@@ -1,14 +1,13 @@
 # DocuTalksAI
-
-Transform documents into engaging podcast-style audio with chapter navigation and an optional YouTube recommender companion.
-
+An AI-powered platform that transforms documents into engaging, podcast-style audio content featuring chapter navigation, a retrieval-augmented generation (RAG) system for intelligent Q&A, an interactive 3D bot that explains concepts with emotional depth and expressive movement, and an integrated YouTube recommender companion.
 ## Features
 
 - Document upload: PDF, DOCX, TXT, and images (OCR)
 - AI rewrite: Produces clean, conversational markdown with headings
 - Audio generation: TTS creates an `.mp3` with chapter navigation
 - Chapters UI: Navigate sections and seek in audio
-- Q&A panel: Local RAG over generated script (optional)
+- Q&A panel: Local RAG over generated script 
+- 3D bot that explains concepts and stores your chat in cache memory and respond based on previous chat
 - YouTube recommender: Standalone app, integrated under `/youtube` in production
 
 ## Tech Stack
@@ -18,6 +17,7 @@ Transform documents into engaging podcast-style audio with chapter navigation an
 - AI rewrite: LM studio Model(mistral 7b) ,you can use gemini api based on the system gpu
 - TTS: Python `gTTS`
 - Extraction: `pdfplumber`, `python-docx`, `pytesseract` + `Pillow`
+- Ollama 3.1 8b model for 3d bot
 
 ## Prerequisites
 
@@ -25,11 +25,12 @@ Transform documents into engaging podcast-style audio with chapter navigation an
 - Python 3.10+ with `pip`
 - Windows users: Tesseract OCR installed (for image OCR)
   - Typical path: `C:\Program Files\Tesseract-OCR\tesseract.exe`
+-Mistral 7b model from LM studio 
 
 ## Environment Variables
 
 Create `.env` in the project root (server reads from process env):
-
+- `Eleven_Labs_API_KEY` 
 - `GEMINI_API_KEY` or `GOOGLE_AI_API_KEY`: Google GenAI API key
 - `PORT` (optional): server port (default 3000)
 
