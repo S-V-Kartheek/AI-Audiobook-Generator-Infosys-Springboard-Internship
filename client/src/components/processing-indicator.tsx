@@ -1,9 +1,10 @@
 import { FileText, Wand2, Volume2, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import type { ProcessingJob } from "@shared/schema";
 
 interface ProcessingIndicatorProps {
-  status: 'extracting' | 'rewriting' | 'generating_audio' | 'completed';
+  status: ProcessingJob['status'];
   progress: number;
 }
 

@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
@@ -23,10 +23,10 @@ if (!fs.existsSync(audioDir)) {
 
 const upload = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (req: Request, file: any, cb: (error: Error | null, destination: string) => void) => {
       cb(null, uploadsDir);
     },
-    filename: (req, file, cb) => {
+    filename: (req: Request, file: any, cb: (error: Error | null, filename: string) => void) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + '-' + file.originalname);
     }
@@ -40,7 +40,8 @@ async function processDocument(jobId: string, filePath: string, fileExtension: s
   try {
     await storage.updateJob(jobId, { status: 'extracting', progress: 10 });
 
-    const pythonPath = 'python3';
+    // Use 'python' for Windows and 'python3' for other operating systems
+    const pythonPath = process.platform === 'win32' ? 'python' : 'python3';
     const extractorScript = path.join(process.cwd(), 'python', 'text_extractor.py');
     
     const { stdout: extractOutput } = await execAsync(
@@ -120,25 +121,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/upload', upload.single('file'), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-      }
+type RequestWithFile = Request & { file?: { originalname: string; path: string } };
 
-      const fileExtension = path.extname(req.file.originalname).slice(1).toLowerCase();
-      const validExtensions = ['pdf', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
+app.post('/api/upload', upload.single('file'), async (req: RequestWithFile, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const fileExtension = path.extname(req.file.originalname).slice(1).toLowerCase();
+    const validExtensions = ['pdf', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
       
-      if (!validExtensions.includes(fileExtension)) {
-        fs.unlinkSync(req.file.path);
-        return res.status(400).json({ 
-          error: 'Invalid file type. Please upload PDF, DOCX, TXT, or image files.' 
-        });
-      }
+    if (!validExtensions.includes(fileExtension)) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ 
+        error: 'Invalid file type. Please upload PDF, DOCX, TXT, or image files.' 
+      });
+    }
 
-      const job = await storage.createJob(req.file.originalname);
+    const job = await storage.createJob(req.file.originalname);
 
-      processDocument(job.id, req.file.path, fileExtension);
+    processDocument(job.id, req.file.path, fileExtension);
 
       res.json({ jobId: job.id });
     } catch (error) {

@@ -5,6 +5,8 @@ import { FileUploadZone } from "@/components/file-upload-zone";
 import { ProcessingIndicator } from "@/components/processing-indicator";
 import { ContentDisplay } from "@/components/content-display";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Youtube, Bot } from "lucide-react";
 import type { ProcessingJob } from "@shared/schema";
 
 export default function Home() {
@@ -68,12 +70,37 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="max-w-5xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-semibold text-foreground">Document to Podcast</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Transform your documents into engaging audio narration
-          </p>
+      <header className="border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">AI Audiobook Generator</h1>
+            <p className="text-xs text-muted-foreground">Professional narration from your documents</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const isDev = import.meta.env && (import.meta as any).env.DEV;
+                const url = isDev
+                  ? ((import.meta as any).env?.VITE_YOUTUBE_RECOMMENDER_URL || "http://localhost:5173/")
+                  : "/youtube/";
+                window.open(url, "_blank");
+              }}
+              data-testid="button-youtube-recommender"
+            >
+              <Youtube className="mr-2 h-4 w-4" />
+              YouTube Recommender
+            </Button>
+            <Button
+              onClick={() => {
+                window.open("https://chat-bot-3xrm.onrender.com/", "_blank");
+              }}
+              data-testid="button-3d-bot"
+            >
+              <Bot className="mr-2 h-4 w-4" />
+              3D Bot
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -96,6 +123,8 @@ export default function Home() {
             rewrittenMarkdown={job.rewrittenMarkdown || ''}
             chapters={job.chapters || []}
             audioPath={job.audioPath || ''}
+            jobId={job.id}
+            documentName={job.originalFilename}
             onReset={handleReset}
           />
         )}

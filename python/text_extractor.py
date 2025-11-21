@@ -1,10 +1,24 @@
 #!/usr/bin/env python3
 import sys
+import os
 import json
-import pdfplumber
+import platform
+ 
 from docx import Document
 from PIL import Image
 import pytesseract
+
+def ensure_tesseract_available():
+    if platform.system() == 'Windows':
+        pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+        if not os.path.exists(pytesseract.pytesseract.tesseract_cmd):
+            pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe'
+        if not os.path.exists(pytesseract.pytesseract.tesseract_cmd):
+            raise Exception(
+                "Tesseract is not installed or not in the default location. "
+                "Please install Tesseract OCR from https://github.com/UB-Mannheim/tesseract/wiki "
+                "and make sure it's added to your system PATH during installation."
+            )
 
 def extract_from_pdf(filepath):
     """Extract text from PDF using pdfplumber"""
@@ -31,6 +45,7 @@ def extract_from_docx(filepath):
 def extract_from_image(filepath):
     """Extract text from image using pytesseract OCR"""
     try:
+        ensure_tesseract_available()
         image = Image.open(filepath)
         text = pytesseract.image_to_string(image)
     except Exception as e:

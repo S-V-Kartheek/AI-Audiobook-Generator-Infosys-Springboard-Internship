@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Download, RotateCcw } from "lucide-react";
+import { Download, RotateCcw, MessageCircle, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,12 +7,16 @@ import { Separator } from "@/components/ui/separator";
 import { ChapterNavigation } from "@/components/chapter-navigation";
 import { AudioPlayer } from "@/components/audio-player";
 import { MarkdownContent } from "@/components/markdown-content";
+import { QnaPanel } from "@/components/qna-panel";
+import { useRagIndexer } from "@/hooks/use-rag-indexer";
 import type { Chapter } from "@shared/schema";
 
 interface ContentDisplayProps {
   rewrittenMarkdown: string;
   chapters: Chapter[];
   audioPath: string;
+  jobId: string;
+  documentName: string;
   onReset: () => void;
 }
 
@@ -20,6 +24,8 @@ export function ContentDisplay({
   rewrittenMarkdown,
   chapters,
   audioPath,
+  jobId,
+  documentName,
   onReset,
 }: ContentDisplayProps) {
   const [activeChapterId, setActiveChapterId] = useState<string>(
@@ -27,6 +33,13 @@ export function ContentDisplay({
   );
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [showQna, setShowQna] = useState(false);
+
+  const { status: ragStatus, error: ragError } = useRagIndexer(
+    rewrittenMarkdown,
+    jobId,
+    documentName
+  );
 
   useEffect(() => {
     const currentChapter = chapters.find(
@@ -131,6 +144,52 @@ export function ContentDisplay({
             />
           </ScrollArea>
         </Card>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4 rounded-xl border border-border/60 bg-card/30 p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Need instant answers?</h3>
+            <p className="text-sm text-muted-foreground">
+              Chat with an AI assistant grounded in your freshly generated script.
+            </p>
+          </div>
+          <Button
+            variant={showQna ? "outline" : "default"}
+            onClick={() => setShowQna((prev) => !prev)}
+            disabled={ragStatus === "indexing"}
+          >
+            {ragStatus === "indexing" ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Preparing Q&A...
+              </>
+            ) : (
+              <>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {showQna ? "Hide Q&A" : "Open Q&A"}
+              </>
+            )}
+          </Button>
+        </div>
+
+        {ragStatus === "error" && (
+          <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <AlertTriangle className="mt-0.5 h-4 w-4" />
+            <p>{ragError}</p>
+          </div>
+        )}
+
+        {showQna && (
+          <QnaPanel
+            documentKey={jobId}
+            documentName={documentName || "podcast-script.md"}
+            status={ragStatus}
+            error={ragError}
+          />
+        )}
       </div>
     </div>
   );
