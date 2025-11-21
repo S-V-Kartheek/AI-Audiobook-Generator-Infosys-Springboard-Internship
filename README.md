@@ -1,5 +1,7 @@
 # DocuTalksAI
 An AI-powered platform that transforms documents into engaging, podcast-style audio content featuring chapter navigation, a retrieval-augmented generation (RAG) system for intelligent Q&A, an interactive 3D bot that explains concepts with emotional depth and expressive movement, and an integrated YouTube recommender companion.
+
+Live demo-> https://drive.google.com/file/d/19iR4iQIlJA9ba5cgohx7tlMzEq6kIpgX/view?usp=drive_link
 ## Features
 
 - Document upload: PDF, DOCX, TXT, and images (OCR)
